@@ -2,6 +2,8 @@
 
 SoftwareSerial serialBlue(11, 12); //Rx, Tx.
 int command = 0;
+int lastCommand = 0;
+int carSpeed;
 
 int enA = 10;
 int in1 = 9;
@@ -29,21 +31,34 @@ void loop() {
     command = serialBlue.read();
     if (command == 'u') {
       up();
-      command = 0;
+      changeCommand();
     } else if (command == 'd') {
       down();
-      command = 0;
+      changeCommand();
     } else if (command == 'l') {
-      left();
-      command = 0;
+      if (lastCommand == 'd') {
+        leftReverse();
+      } else {
+        left();
+      }
+      changeCommand();
     } else if (command == 'r') {
-      right();
-      command = 0;
+      if (lastCommand == 'd') {
+        rightReverse();
+      } else {
+        right();
+      }
+      changeCommand();
     } else if (command == 's') {
       stopKar();
-      command = 0;
+      changeCommand();
     }
   }
+}
+
+void changeCommand() {
+  lastCommand = command;
+  command = 0;
 }
 
 void up() {
@@ -74,10 +89,26 @@ void left() {
   analogWrite(enB, 180);
 }
 
+void leftReverse() {
+  stopKar();
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+
+  analogWrite(enB, 180);
+}
+
 void right() {
   stopKar();
   digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
+
+  analogWrite(enA, 180);
+}
+
+void rightReverse() {
+  stopKar();
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
 
   analogWrite(enA, 180);
 }
